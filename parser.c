@@ -29,8 +29,7 @@ static int  is_parse_ok=1;
 /**********************************************************************/
 /* define tokens + keywords NB: remove this when keytoktab.h is added */
 /**********************************************************************/
-enum tvalues { tstart=256,
-               program, id, number, assign, input, output,
+enum tvalues { program=257, id, number, assign, input, output,
                var, begin, end, integer, real, boolean };
 /**********************************************************************/
 /* Simulate the token stream for a given program                      */
@@ -41,7 +40,6 @@ static int tokens[] = {
     begin, 
     id, assign, id, '+', id, '*', number,
     end, '.',
-    '$' 
 };
 
 /**********************************************************************/
