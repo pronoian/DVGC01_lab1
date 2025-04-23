@@ -12,7 +12,7 @@
 /**********************************************************************/
 /* Other OBJECT's METHODS (IMPORTED)                                  */
 /**********************************************************************/
-/* #include "keytoktab.h"   */       /* when the keytoktab is added   */
+ #include "keytoktab.h"         /* when the keytoktab is added   */
 /* #include "lexer.h"       */       /* when the lexer     is added   */
 /* #include "symtab.h"      */       /* when the symtab    is added   */
 /* #include "optab.h"       */       /* when the optab     is added   */
@@ -29,8 +29,10 @@ static int  is_parse_ok=1;
 /**********************************************************************/
 /* define tokens + keywords NB: remove this when keytoktab.h is added */
 /**********************************************************************/
+
+/** 
 enum tvalues { program=257, id, number, assign, input, output,
-               var, begin, end, integer, real, boolean };
+               var, begin, end, integer, real, boolean };*/
 /**********************************************************************/
 /* Simulate the token stream for a given program                      */
 /**********************************************************************/
@@ -67,8 +69,8 @@ static void out(char* s)
 /**********************************************************************/
 static void match(int t)
 {
-    if(DEBUG) printf("\n --------In match expected: %4d, found: %4d",
-                    t, lookahead);
+    if(DEBUG) printf("\n *** In match \t\t expected %4s found %4s",
+                    tok2lex(t), tok2lex(lookahead));
     if (lookahead == t) lookahead = pget_token();
     else {
     is_parse_ok=0;
@@ -97,7 +99,7 @@ static void program_header()
 
 static void type()
 {
-    //in("type");
+    in("type");
     if (lookahead == integer) {
         match(integer);
     } else if (lookahead == real) {
@@ -108,38 +110,38 @@ static void type()
         is_parse_ok = 0;
         printf("\n *** Syntax: Expected: type found: %d", lookahead);
     }
-    //out("type");
+    out("type");
 }
 
 static void id_list()
 {
-    //in("id_list");
+    in("id_list");
     match(id);
     while (lookahead == ',') {
         match(',');
         match(id);
     }
-    //out("id_list");
+    out("id_list");
 }
 
 static void var_dec()
 {
-    //in("var_dec");
+    in("var_dec");
     id_list();
     match(':');
     type();
     match(';');
-    //out("var_dec");
+    out("var_dec");
 }
 
 static void var_dec_list()
 {
-    //in("var_dec_list");
+    in("var_dec_list");
     var_dec();
     while (lookahead == id) {
         var_dec();
     }
-    //out("var_dec_list");
+    out("var_dec_list");
 }
 
 static void var_part()
@@ -152,7 +154,7 @@ static void var_part()
 
 static void operand()
 {
-    //in("operand");
+    in("operand");
     if (lookahead == id) {
         match(id);
     } else if (lookahead == number) {
@@ -161,12 +163,12 @@ static void operand()
         is_parse_ok = 0;
         printf("\n *** Syntax: Expected: operand found: %d", lookahead);
     }
-    //out("operand");
+    out("operand");
 }
 
 static void factor()
 {
-    //in("factor");
+    in("factor");
     if (lookahead == '(') {
         match('(');
         expr();
@@ -174,56 +176,56 @@ static void factor()
     } else {
         operand();
     }
-    //out("factor");
+    out("factor");
 }
 
 static void term()
 {
-    //in("term");
+    in("term");
     factor();
     while (lookahead == '*') {
         match('*');
         factor();
     }
-    //out("term");
+    out("term");
 }
 
 static void expr()
 {
-    //in("expr");
+    in("expr");
     term();
     while (lookahead == '+') {
         match('+');
         term();
     }
-    //out("expr");
+    out("expr");
 }
 
 static void assign_stat()
 {
-    //in("assign_stat");
+    in("assign_stat");
     match(id);
     match(assign);
     expr();
-    //out("assign_stat");
+    out("assign_stat");
 }
 
 static void stat()
 {
-    //in("stat");
+    in("stat");
     assign_stat();
-    //out("stat");
+    out("stat");
 }
 
 static void stat_list()
 {
-    //in("stat_list");
+    in("stat_list");
     stat();
     while (lookahead == ';') {
         match(';');
         stat();
     }
-    //out("stat_list");
+    out("stat_list");
 }
 
 static void stat_part()
