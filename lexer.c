@@ -35,10 +35,8 @@ static void pbuffer();                /* print the program buffer      */
 /* Read the input file into the buffer                                */
 /**********************************************************************/
 /**
- * TODO: 
- *  Remove blank spaces in program before reading
- *  Kolla om vissa delar kan implementeras med färdiga funktioner i keytoktab.case
- *  Testa att simplifiera koden med lättare funktioner
+ * TODO:
+ * Ta bort kommentarer
  */
 
 
@@ -49,11 +47,15 @@ static void get_prog()
     
     /* Läs in tecken från stdin (där filen är kopplad) tills EOF eller bufferten är full */
     while ((c = getchar()) != EOF && pbuf < BUFSIZE - 1) {
-        buffer[pbuf++] = c;      /* Spara tecknet och öka index */
+        if (c != 13)
+        {
+            buffer[pbuf++] = c;      /* Spara tecknet och öka index */
+        }
+        
     }
     
     /* Lägg till ett sluttecken i bufferten */
-    buffer[pbuf] = '$';          /* $ används som sluttecken */
+    buffer[pbuf] = '$';         
     
     /* Återställ läspositionen till början av bufferten */
     pbuf = 0;
@@ -67,11 +69,16 @@ static void get_prog()
 static void pbuffer()
 {
     int i;
-    printf("\nBuffer contents:\n");
+    printf("________________________________________________________");
+    printf("\n THE PROGRAM TEXT:\n");
+    printf("________________________________________________________\n");
     for (i = 0; buffer[i] != '$' && i < BUFSIZE; i++) {
-        putchar(buffer[i]);
+        printf("%c", (buffer[i]));
     }
-    printf("\n");
+    printf("$\n");
+
+    printf("________________________________________________________");
+    
 }
 
 /**********************************************************************/
@@ -81,13 +88,8 @@ static void pbuffer()
 static void get_char()
 {
     if (plex < LEXSIZE - 1) {
-        /* Kopiera ett tecken från programbufferten till lexembufferten */
+        // kopiera till lexem buffert
         lexbuf[plex++] = buffer[pbuf++];
-    }
-    else {
-        /* Hantera överflöde i lexembufferten */
-        printf("\nError: Lexeme buffer overflow\n");
-        plex = LEXSIZE - 1;
     }
 }
 
@@ -103,57 +105,50 @@ static void get_char()
 /**********************************************************************/
 int get_token()
 {
-    
-    /* Första gången funktionen anropas, läs in programfilen */
-    if (pbuf == 0 && buffer[0] != '$') {
+   
+    if (pbuf == 0 && buffer[0] != '$') 
         get_prog();
-    }
     
-    /* Återställ lexembufferten */
     plex = 0;
     memset(lexbuf, 0, LEXSIZE);
-    
-    /* Hoppa över whitespace (mellanslag, tab, radbrytning) */
     while (buffer[pbuf] == ' ' || buffer[pbuf] == '\t' || buffer[pbuf] == '\n') {
         pbuf++;
     }
-    
-    /* Kontrollera om vi nått slutet av filen */
+    // EOF
     if (buffer[pbuf] == '$') {
         lexbuf[0] = '$';
-        lexbuf[1] = '\0';
+        //lexbuf[1] = '\0';
         return '$';
     }
     
-    /* Identifiera identifierare (börjar med en bokstav) */
+    // Om den börjar med bokstav är det ID 
     if (isalpha(buffer[pbuf])) {
         while (isalpha(buffer[pbuf]) || isdigit(buffer[pbuf])) {
             get_char();
         }
-        lexbuf[plex] = '\0';  /* Avsluta strängen */
-        return lex2tok(lexbuf);  /* Konvertera till token */
+        //lexbuf[plex] = '\0';  
+        return lex2tok(lexbuf);  
     }
     
-    /* Identifiera nummer */
+    // om den är en siffra 
     if (isdigit(buffer[pbuf])) {
         while (isdigit(buffer[pbuf])) {
             get_char();
         }
-        lexbuf[plex] = '\0';
-        return number;  /* Returnera nummer-token */
+        //lexbuf[plex] = '\0';
+        return number;  
     }
-    // TODO: Kolla om dessa ⤵️ kan implementeras med keytoktab.c funktioner istället
-    /* Hantera speciella operatorer som ':=' */
+    // Hatera assign opperator
     if (buffer[pbuf] == ':' && buffer[pbuf+1] == '=') {
-        get_char();  /* Läs ':' */
-        get_char();  /* Läs '=' */
-        lexbuf[plex] = '\0';
-        return assign;  /* Returnera tilldelnings-token */
+        get_char();  // läs :
+        get_char();  // läs =
+        //lexbuf[plex] = '\0';
+        return assign; 
     }
     
-    /* Hantera enskilda tecken (operatorer och skiljetecken) */
+    // enskilda tecken
     get_char();
-    lexbuf[plex] = '\0';
+    //lexbuf[plex] = '\0';
     return lex2tok(lexbuf);
 }
 
@@ -162,8 +157,7 @@ int get_token()
 /**********************************************************************/
 char * get_lexeme()
 {
-    /* Säkerställ att lexemet är null-terminerat */
-    lexbuf[plex] = '\0';
+    //lexbuf[plex] = '\0';
     return lexbuf;
 }
 
