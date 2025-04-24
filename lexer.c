@@ -127,7 +127,7 @@ int get_token()
             get_char();
         }
         //lexbuf[plex] = '\0';  
-        return lex2tok(lexbuf);  
+        return key2tok((char *)&lexbuf);  
     }
     
     // om den är en siffra 
