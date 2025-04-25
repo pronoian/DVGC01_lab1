@@ -66,13 +66,18 @@ static void addrow(char *fname, toktyp frole, toktyp ftype,
         set_size(numrows, fsize);
         set_addr(numrows, faddr);
         numrows++;
-    } else {
-        printf("\nError: Symbol table full!");
-    }
+    } 
 }
 /**********************************************************************/
 /*  Initialise the symbol table                                       */
 /**********************************************************************/
+/**
+ * TODO: 
+ * Kolla hur initst() ska vara från början och om den ska initialiseras
+ *  ändra i kommentarer och error printf meddelanden
+ */
+
+
 /*
 static void initst()
 {
@@ -124,36 +129,38 @@ void p_symtab()
         startp = 0;
         initialized = 1;
         //initst();
-    }
-    
-    printf("\n________________________________________________________ ");
-    printf("\n THE SYMBOL TABLE");
-    printf("\n________________________________________________________ ");
-    printf("\n       NAME       ROLE       TYPE      SIZE      ADDR     ");
-    printf("\n________________________________________________________ ");
-    
-    // Display all entries
-    for (i = 0; i < numrows; i++) {
-        p_symrow(i);
-    }
-    
-    // Calculate total size - but don't double count
-    // If there's a program entry, use its size as the total
-    // Otherwise, sum all variable sizes
-    if (startp < numrows && get_role(startp) == program) {
-        total_size = get_size(startp);
-    } else {
+    }else{
+
+        
+        printf("\n________________________________________________________ ");
+        printf("\n THE SYMBOL TABLE");
+        printf("\n________________________________________________________ ");
+        printf("\n       NAME       ROLE       TYPE      SIZE      ADDR     ");
+        printf("\n________________________________________________________ ");
+        
+        // Display all entries
         for (i = 0; i < numrows; i++) {
-            if (get_role(i) == id) {
-                total_size += get_size(i);
+            p_symrow(i);
+        }
+        
+        // Calculate total size - but don't double count
+        // If there's a program entry, use its size as the total
+        // Otherwise, sum all variable sizes
+        if (startp < numrows && get_role(startp) == program) {
+            total_size = get_size(startp);
+        } else {
+            for (i = 0; i < numrows; i++) {
+                if (get_role(i) == id) {
+                    total_size += get_size(i);
+                }
             }
         }
+        
+        printf("\n________________________________________________________ ");
+        printf("\n STATIC STORAGE REQUIRED is %d BYTES", total_size);
+        printf("\n________________________________________________________ ");
+        printf("\n");
     }
-    
-    printf("\n________________________________________________________ ");
-    printf("\n STATIC STORAGE REQUIRED is %d BYTES", total_size);
-    printf("\n________________________________________________________ ");
-    printf("\n");
 }
 
 /**********************************************************************/
@@ -167,9 +174,6 @@ void addp_name(char * fpname)
         // Not found, add to table
         startp = numrows;  // Remember program position
         addrow(fpname, program, program, 0, 0);  // Initial size is 0
-    } else {
-        // Already exists, error (not shown in example)
-        printf("\nSemantic: Program identifier already declared");
     }
 }
 
@@ -183,7 +187,7 @@ void addv_name(char * fpname)
     if (ref == nfound) {
         // Not found, add to table with default values
         // Type will be set later with setv_type
-        addrow(fpname, id, undef, 0, 0);
+        addrow(fpname, var, undef, 0, 0);
     } else {
         // Already exists, error
         printf("\nSemantic: Identifier already declared");
@@ -222,7 +226,7 @@ void setv_type(toktyp ftype)
     
     // Find all undefined variables and set their type and size
     for (i = 0; i < numrows; i++) {
-        if (get_role(i) == id && get_type(i) == undef) {
+        if (get_role(i) == var && get_type(i) == undef) {
             set_type(i, ftype);
             set_size(i, size_value);
             set_addr(i, current_addr);
@@ -245,10 +249,11 @@ toktyp get_ntype(char * fpname)
     
     if (ref != nfound) {
         return get_type(ref);
-    } else {
-        printf("\nSemantic: Identifier not declared");
-        return error;
     }
+
+    
+    return error;
+    
 }
 
 /**********************************************************************/

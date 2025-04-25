@@ -14,13 +14,13 @@
 /**********************************************************************/
  #include "keytoktab.h"         /* when the keytoktab is added   */
  #include "lexer.h"              /* when the lexer     is added   */
-/* #include "symtab.h"      */       /* when the symtab    is added   */
+ #include "symtab.h"             /* when the symtab    is added   */
 /* #include "optab.h"       */       /* when the optab     is added   */
 
 /**********************************************************************/
 /* OBJECT ATTRIBUTES FOR THIS OBJECT (C MODULE)                       */
 /**********************************************************************/
-#define DEBUG 1
+#define DEBUG 0
 static int  lookahead=0;
 static int  is_parse_ok=1;
 
@@ -91,8 +91,12 @@ static void expr();
 /**********************************************************************/
 static void program_header()
 {
+    p_symtab();
     in("program_header");
-    match(program); match(id); match('('); match(input);
+    match(program); 
+    addp_name(get_lexeme());
+    match(id);
+    match('('); match(input);
     match(','); match(output); match(')'); match(';');
     out("program_header");
 }
@@ -101,10 +105,13 @@ static void type()
 {
     in("type");
     if (lookahead == integer) {
+        setv_type(integer);
         match(integer);
     } else if (lookahead == real) {
+        setv_type(real);
         match(real);
     } else if (lookahead == boolean) {
+        setv_type(boolean);
         match(boolean);
     } else {
         is_parse_ok = 0;
@@ -116,9 +123,11 @@ static void type()
 static void id_list()
 {
     in("id_list");
+    addv_name(get_lexeme());
     match(id);
     while (lookahead == ',') {
         match(',');
+        addv_name(get_lexeme());
         match(id);
     }
     out("id_list");
@@ -256,6 +265,7 @@ int parser()
     in("parser");
     lookahead = get_token();      // get the first token
     prog();                        // call the first grammar rule
+    p_symtab();
     out("parser");
     return is_parse_ok;            // status indicator
 }
