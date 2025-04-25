@@ -43,7 +43,24 @@ static int optab[][NENTS] = {
 /**********************************************************************/
 void p_optab()
 {
-    printf("\n *** TO BE DONE");
+    int i = 0;
+    
+    printf("\n________________________________________________________ ");
+    printf("\n THE OPERATOR TABLE");
+    printf("\n________________________________________________________ ");
+    printf("\n \t operator \t arg1 \t    arg2 \t    result");
+    printf("\n________________________________________________________ ");
+    
+    while (optab[i][0] != '$') {
+        printf("\n%11c, \t %10s, \t %10s, \t %10s ", 
+            optab[i][0], 
+            tok2lex(optab[i][1]), 
+            tok2lex(optab[i][2]), 
+            tok2lex(optab[i][3]));
+        i++;
+    }
+    
+    printf("\n________________________________________________________ ");
 }
 
 /**********************************************************************/
@@ -51,7 +68,18 @@ void p_optab()
 /**********************************************************************/
 int get_otype(int op, int arg1, int arg2)
 {
-    printf("\n *** TO BE DONE"); return 0;
+    int i = 0;
+    
+    // Search the operation table for a matching rule
+    while (optab[i][0] != '$') {
+        if (optab[i][0] == op && optab[i][1] == arg1 && optab[i][2] == arg2) {
+            return optab[i][3];  // Return the result type
+        }
+        i++;
+    }
+    
+    // No matching rule found
+    return undef;
 }
 
 /**********************************************************************/

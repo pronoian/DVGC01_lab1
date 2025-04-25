@@ -15,7 +15,7 @@
  #include "keytoktab.h"         /* when the keytoktab is added   */
  #include "lexer.h"              /* when the lexer     is added   */
  #include "symtab.h"             /* when the symtab    is added   */
-/* #include "optab.h"       */       /* when the optab     is added   */
+ #include "optab.h"              /* when the optab     is added   */
 
 /**********************************************************************/
 /* OBJECT ATTRIBUTES FOR THIS OBJECT (C MODULE)                       */
@@ -84,7 +84,7 @@ static void match(int t)
 /**********************************************************************/
 static void var_dec_list();
 static void stat_list();
-static void expr();
+static toktyp expr();
 
 /**********************************************************************/
 /* The grammar functions                                              */
@@ -161,61 +161,131 @@ static void var_part()
     out("var_part");
 }
 
-static void operand()
+static toktyp operand()
 {
+    toktyp result_type = undef;
     in("operand");
+    
     if (lookahead == id) {
+        // Get the type of this identifier from symbol table
+        result_type = get_ntype(get_lexeme());
+        if (result_type == error) {
+            printf("\nSemantic: Identifier not declared");
+            is_parse_ok = 0;
+        }
         match(id);
     } else if (lookahead == number) {
+        // Assume all numbers are integers for simplicity
+        result_type = integer;
         match(number);
     } else {
         is_parse_ok = 0;
         printf("\n *** Syntax: Expected: operand found: %d", lookahead);
     }
+    
     out("operand");
+    return result_type;
 }
 
-static void factor()
+static toktyp factor()
 {
+    toktyp result_type;
     in("factor");
+    
     if (lookahead == '(') {
         match('(');
-        expr();
+        result_type = expr();
         match(')');
     } else {
-        operand();
+        result_type = operand();
     }
+    
     out("factor");
+    return result_type;
 }
 
-static void term()
+static toktyp term()
 {
+    toktyp type1, type2, result_type;
     in("term");
-    factor();
+    
+    type1 = factor();
+    result_type = type1;
+    
     while (lookahead == '*') {
         match('*');
-        factor();
+        type2 = factor();
+        // Check operation validity and get result type
+        result_type = get_otype('*', type1, type2);
+        if (result_type == undef) {
+            printf("\nSemantic: Invalid types for * operation: %s and %s", 
+                   tok2lex(type1), tok2lex(type2));
+            is_parse_ok = 0;
+        }
+        type1 = result_type; // For chained operations
     }
+    
     out("term");
+    return result_type;
 }
 
-static void expr()
+static toktyp expr()
 {
+    toktyp type1, type2, result_type;
     in("expr");
-    term();
+    
+    type1 = term();
+    result_type = type1;
+    
     while (lookahead == '+') {
         match('+');
-        term();
+        type2 = term();
+        // Check operation validity and get result type
+        result_type = get_otype('+', type1, type2);
+        if (result_type == undef) {
+            printf("\nSemantic: Invalid types for + operation: %s and %s", 
+                   tok2lex(type1), tok2lex(type2));
+            is_parse_ok = 0;
+        }
+        type1 = result_type; // For chained operations
     }
+    
     out("expr");
+    return result_type;
 }
 
 static void assign_stat()
 {
+    toktyp id_type, expr_type;
+    char *id_name;
+    
     in("assign_stat");
+    
+    // Save the identifier name to look up its type
+    id_name = get_lexeme();
+    
+    // Check if the identifier exists
+    if (!find_name(id_name)) {
+        printf("\nSemantic: Identifier not declared");
+        is_parse_ok = 0;
+    }
+    
+    // Get the type of the identifier
+    id_type = get_ntype(id_name);
+    
     match(id);
     match(assign);
-    expr();
+    
+    // Get the type of the expression
+    expr_type = expr();
+    
+    // Check if the assignment is valid
+    if (id_type != expr_type) {
+        printf("\nSemantic: Assign Types: %s = %s", 
+               tok2lex(id_type), tok2lex(expr_type));
+        is_parse_ok = 0;
+    }
+    
     out("assign_stat");
 }
 
