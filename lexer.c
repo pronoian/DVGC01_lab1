@@ -1,3 +1,4 @@
+/**  @author: Emil Svensson */ 
 /**********************************************************************/
 /* lab 1 DVG C01 - Lexer OBJECT                                       */
 /**********************************************************************/
@@ -34,30 +35,25 @@ static void pbuffer();                /* print the program buffer      */
 /**********************************************************************/
 /* Read the input file into the buffer                                */
 /**********************************************************************/
-/**
- * TODO:
- * Ta bort kommentarer
- */
 
 
 static void get_prog()
 {
     int c;
-    pbuf = 0;                     /* Reset buffer position */
+    pbuf = 0;
     
-    /* Läs in tecken från stdin (där filen är kopplad) tills EOF eller bufferten är full */
+    // läser in program tills EOF
     while ((c = getchar()) != EOF && pbuf < BUFSIZE - 1) {
         if (c != 13)
         {
-            buffer[pbuf++] = c;      /* Spara tecknet och öka index */
+            buffer[pbuf++] = c;     
         }
         
     }
     
-    /* Lägg till ett sluttecken i bufferten */
+    // lägg till sluttecken
     buffer[pbuf] = '$';         
     
-    /* Återställ läspositionen till början av bufferten */
     pbuf = 0;
     pbuffer();
 }
@@ -68,11 +64,10 @@ static void get_prog()
 
 static void pbuffer()
 {
-    int i;
     printf("\n________________________________________________________");
-    printf("\n THE PROGRAM TEXT:\n");
+    printf("\n THE PROGRAM TEXT\n");
     printf("________________________________________________________\n");
-    for (i = 0; buffer[i] != '$' && i < BUFSIZE; i++) {
+    for (int i = 0; buffer[i] != '$'; i++) {
         printf("%c", (buffer[i]));
     }
     printf("$\n");
@@ -117,16 +112,14 @@ int get_token()
     // EOF
     if (buffer[pbuf] == '$') {
         lexbuf[0] = '$';
-        //lexbuf[1] = '\0';
         return '$';
     }
     
-    // Om den börjar med bokstav är det ID 
+    // Om den börjar med bokstav
     if (isalpha(buffer[pbuf])) {
         while (isalpha(buffer[pbuf]) || isdigit(buffer[pbuf])) {
             get_char();
         }
-        //lexbuf[plex] = '\0';  
         return key2tok((char *)&lexbuf);  
     }
     
@@ -135,20 +128,17 @@ int get_token()
         while (isdigit(buffer[pbuf])) {
             get_char();
         }
-        //lexbuf[plex] = '\0';
         return number;  
     }
-    // Hatera assign opperator
+    // Hatera assign tecken
     if (buffer[pbuf] == ':' && buffer[pbuf+1] == '=') {
         get_char();  // läs :
         get_char();  // läs =
-        //lexbuf[plex] = '\0';
         return assign; 
     }
     
     // enskilda tecken
     get_char();
-    //lexbuf[plex] = '\0';
     return lex2tok(lexbuf);
 }
 
@@ -157,7 +147,6 @@ int get_token()
 /**********************************************************************/
 char * get_lexeme()
 {
-    //lexbuf[plex] = '\0';
     return lexbuf;
 }
 

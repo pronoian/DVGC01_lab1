@@ -1,3 +1,4 @@
+/**  @author: Emil Svensson */ 
 /**********************************************************************/
 /* lab 1 DVG C01 - Driver OBJECT                                      */
 /**********************************************************************/
@@ -74,25 +75,25 @@ static tab keywordtab[ ] = {
 /**********************************************************************/
 void p_toktab()
 {
-    int i;
     
-    printf("\n________________________________________________________ ");
+    
+    printf("\n________________________________________________________");
     printf("\n THE PROGRAM KEYWORDS ");
-    printf("\n________________________________________________________ ");
+    printf("\n________________________________________________________");
     
-    for (i = 0; keywordtab[i].token != nfound; i++) {
-        printf("\n%10s  %3d ", keywordtab[i].text, keywordtab[i].token);
+    for (int i = 0; keywordtab[i].token != nfound; i++) {
+        printf("\n%10s  %3d", keywordtab[i].text, keywordtab[i].token);
     }
     
-    printf("\n________________________________________________________ ");
+    printf("\n________________________________________________________");
     printf("\n THE PROGRAM TOKENS ");
-    printf("\n________________________________________________________ ");
+    printf("\n________________________________________________________");
     
-    for (i = 0; tokentab[i].token != nfound; i++) {
-        printf("\n%10s  %3d ", tokentab[i].text, tokentab[i].token);
+    for (int i = 0; tokentab[i].token != nfound; i++) {
+        printf("\n%10s  %3d", tokentab[i].text, tokentab[i].token);
     }
     
-    printf("\n________________________________________________________ \n");
+    printf("\n________________________________________________________\n");
 
 }
 
@@ -101,28 +102,27 @@ void p_toktab()
 /**********************************************************************/
 toktyp lex2tok(char * fplex)
 {
-    int i;
     
-    /* Check if it's a keyword */
+    
+    // om keyword
     toktyp keyword_token = key2tok(fplex);
     if (keyword_token != id) {
         return keyword_token;
     }
     
-    /* Check if it's a single character */
-    if (strlen(fplex) == 1) {
+    // om 1 karaktär
+    if (strlen(fplex) == 1) { 
         char c = fplex[0];
-        return (toktyp)c;  /* Return ASCII value directly */
+        return (toktyp)c;
     }
     
-    /* Check token table */
-    for (i = 0; tokentab[i].token != nfound; i++) {
+    // kolla tokentab
+    for (int i = 0; tokentab[i].token != nfound; i++) {
         if (strcmp(fplex, tokentab[i].text) == 0) {
             return tokentab[i].token;
         }
     }
     
-    /* If we get here, assume it's an identifier */
     return id;
 }
 
@@ -131,33 +131,15 @@ toktyp lex2tok(char * fplex)
 /**********************************************************************/
 toktyp key2tok(char * fplex)
 {
-    int i;
     
-    for (i = 0; keywordtab[i].token != nfound; i++) {
+    for (int i = 0; keywordtab[i].token != nfound; i++) {
         if (strcmp(fplex, keywordtab[i].text) == 0) {
             return keywordtab[i].token;
         }
     }
     
-    /* Not found in keyword table, return nfound */
+    // inte keyword så id
     return id;
-    
-    
-    /*if (!fplex)
-    {
-        return nfound;
-    }
-
-    for (int i = 0; keywordtab[i].text; i++)
-    {
-        if (strcmp(fplex, keywordtab[i].text) == 0)
-        {
-            return keywordtab[i].token;
-        }
-    }
-    
-    //printf("\n *** TO BE DONE");  
-    return nfound;*/
 }
 
 /**********************************************************************/
@@ -165,25 +147,24 @@ toktyp key2tok(char * fplex)
 /**********************************************************************/
 char * tok2lex(toktyp ftok)
 {
-    int i;
     
-    /* Check keyword table for keyword tokens */
+    // kolla keywordtab
     if (ftok >= kstart && ftok < kend) {
-        for (i = 0; keywordtab[i].token != nfound; i++) {
+        for (int i = 0; keywordtab[i].token != nfound; i++) {
             if (keywordtab[i].token == ftok) {
                 return keywordtab[i].text;
             }
         }
     }
     
-    /* Check token table for non-keyword tokens */
-    for (i = 0; tokentab[i].token != nfound; i++) {
+    // kolla tokentab
+    for (int i = 0; tokentab[i].token != nfound; i++) {
         if (tokentab[i].token == ftok) {
             return tokentab[i].text;
         }
     }
     
-    /* Not found */
+    
     return "?";
 }
 

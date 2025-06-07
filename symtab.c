@@ -1,3 +1,4 @@
+/**  @author: Emil Svensson */ 
 /**********************************************************************/
 /* lab 1 DVG C01 - Symbol Table OBJECT                                */
 /**********************************************************************/
@@ -74,11 +75,10 @@ static void addrow(char *fname, toktyp frole, toktyp ftype,
 /**
  * TODO: 
  * Kolla hur initst() ska vara från början och om den ska initialiseras
- *  ändra i kommentarer och error printf meddelanden
  */
 
 
-/*
+/* I guess håll denna utkommenterad? förstår inte varför den är där ⤵️
 static void initst()
 {
     addrow(tok2lex(predef),  typ, predef, 0, 0);
@@ -96,10 +96,10 @@ static int get_ref(char * fpname)
     int i;
     for (i = 0; i < numrows; i++) {
         if (strcmp(get_name(i), fpname) == 0) {
-            return i;  // Name found, return index
+            return i;
         }
     }
-    return nfound;  // Name not found
+    return nfound;  // name not found
 }
 
 /**********************************************************************/
@@ -110,12 +110,7 @@ static int get_ref(char * fpname)
 /**********************************************************************/
 static void p_symrow(int ftref)
 {
-    printf("\n%10s    %5s    %8s    %6d    %8d", 
-        get_name(ftref),
-        tok2lex(get_role(ftref)),
-        tok2lex(get_type(ftref)),
-        get_size(ftref),
-        get_addr(ftref));
+    printf("\n%8s  %8s  %8s  %8d  %8d", get_name(ftref), tok2lex(get_role(ftref)), tok2lex(get_type(ftref)), get_size(ftref), get_addr(ftref));
 }
 
 void p_symtab()
@@ -123,29 +118,27 @@ void p_symtab()
     static int initialized = 0;
     int i, total_size = 0;
     
-    // Initialize the symbol table if it hasn't been initialized yet
+    // initialisera en gång bara
     if (!initialized) {
-        numrows = 0;  // Just initialize the counters
+        numrows = 0;  
         startp = 0;
         initialized = 1;
         //initst();
     }else{
 
         
-        printf("\n________________________________________________________ ");
-        printf("\n THE SYMBOL TABLE");
-        printf("\n________________________________________________________ ");
-        printf("\n       NAME       ROLE       TYPE      SIZE      ADDR     ");
-        printf("\n________________________________________________________ ");
         
-        // Display all entries
+        printf("\n THE SYMBOL TABLE");
+        printf("\n________________________________________________________");
+        printf("\n       NAME       ROLE       TYPE      SIZE      ADDR     ");
+        printf("\n________________________________________________________");
+        
+
         for (i = 0; i < numrows; i++) {
             p_symrow(i);
         }
         
-        // Calculate total size - but don't double count
-        // If there's a program entry, use its size as the total
-        // Otherwise, sum all variable sizes
+        // räkna ut
         if (startp < numrows && get_role(startp) == program) {
             total_size = get_size(startp);
         } else {
@@ -156,9 +149,9 @@ void p_symtab()
             }
         }
         
-        printf("\n________________________________________________________ ");
+        printf("\n________________________________________________________");
         printf("\n STATIC STORAGE REQUIRED is %d BYTES", total_size);
-        printf("\n________________________________________________________ ");
+        printf("\n________________________________________________________");
         printf("\n");
     }
 }
@@ -169,11 +162,10 @@ void p_symtab()
 void addp_name(char * fpname)
 {
     int ref = get_ref(fpname);
-    
-    if (ref == nfound) {
-        // Not found, add to table
-        startp = numrows;  // Remember program position
-        addrow(fpname, program, program, 0, 0);  // Initial size is 0
+    if (ref == nfound) { 
+        // hittades inte så lägg till i tabellen
+        startp = numrows;
+        addrow(fpname, program, program, 0, 0);
     }
 }
 
@@ -185,12 +177,8 @@ void addv_name(char * fpname)
     int ref = get_ref(fpname);
     
     if (ref == nfound) {
-        // Not found, add to table with default values
-        // Type will be set later with setv_type
+        // hittades inte så lägg till i tabellen
         addrow(fpname, var, undef, 0, 0);
-    } else {
-        // Already exists, error
-        printf("\nSemantic: Identifier already declared");
     }
 }
 
@@ -212,19 +200,18 @@ void setv_type(toktyp ftype)
     int size_value = 0;
     int current_addr = 0;
     
-    // Determine size based on type
-    if (ftype == integer || ftype == boolean) {
-        size_value = 4;  // 4 bytes for int and boolean
-    } else if (ftype == real) {
-        size_value = 8;  // 8 bytes for real
+    // räkna ut storlek baserat på vilken typ variabeln är
+    if (ftype == integer || ftype == boolean) { 
+        size_value = 4;
+    } else if (ftype == real) { 
+        size_value = 8;
     }
     
-    // Calculate starting address
-    if (startp < numrows) {
-        current_addr = get_size(startp);  // Get current program size
+    if (startp < numrows) { 
+        current_addr = get_size(startp);
     }
     
-    // Find all undefined variables and set their type and size
+    // räkna ut total storlek
     for (i = 0; i < numrows; i++) {
         if (get_role(i) == var && get_type(i) == undef) {
             set_type(i, ftype);
@@ -234,7 +221,7 @@ void setv_type(toktyp ftype)
         }
     }
     
-    // Update program size to reflect total memory needed
+
     if (startp < numrows) {
         set_size(startp, current_addr);
     }
@@ -253,7 +240,6 @@ toktyp get_ntype(char * fpname)
 
     
     return error;
-    
 }
 
 /**********************************************************************/
