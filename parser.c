@@ -74,9 +74,9 @@ static void match(int t)
                     tok2lex(t), tok2lex(lookahead));
     if (lookahead == t) lookahead = get_token();
     else {
-    is_parse_ok=0;
-    printf("\n *** Unexpected Token: expected: %4d found: %4d (in match)",
-              t, lookahead);
+        is_parse_ok=0;
+        printf("\nSYNTAX: Symbol expected %s found %s",
+                    tok2lex(t), tok2lex(lookahead));
     }
 }
 
@@ -170,7 +170,7 @@ static toktyp operand()
     if (lookahead == id) {
         result_type = get_ntype(get_lexeme());
         if (result_type == error) {
-            printf("\nSemantic: Identifier not declared");
+            printf("\nSEMANTIC: ID NOT declared: %s", (get_lexeme())); // ...fixed... kommentar
             is_parse_ok = 0;
         }
         match(id);
@@ -180,7 +180,7 @@ static toktyp operand()
         match(number);
     } else {
         is_parse_ok = 0;
-        printf("\n *** Syntax: Expected: operand found: %d", lookahead);
+        printf("\nSYNTAX:\tExpected: operand found: %s", tok2lex(lookahead));
     }
     
     out("operand");
@@ -246,20 +246,29 @@ static toktyp expr()
     return result;
 }
 
-static void assign_stat()
+static void assign_stat() // ...fixed... skrev om assign stat lite
 {
     in("assign_stat");
     
     // Get var name
     char* var_name = get_lexeme();
+    toktyp left_type = get_ntype(var_name);
+    
+    if (left_type == error) {
+        printf("\nSEMANTIC: ID NOT declared: %s", var_name);
+        is_parse_ok = 0;
+        left_type = undef;  // Använd undef för jämförelsen
+    }
+    
     match(id);
     match(assign);
     
-    toktyp left_type = get_ntype(var_name);
     toktyp right_type = expr();
     
-    if (left_type != right_type) {
-        printf("\nType mismatch: %s = %s", tok2lex(left_type), tok2lex(right_type));
+    // Jämför bara om vänster sida inte är undef
+    if (left_type != undef && right_type != undef && left_type != right_type) {
+        printf("\nSEMANTIC: Assign types: %s := %s", 
+               tok2lex(left_type), tok2lex(right_type));
         is_parse_ok = 0;
     }
     
